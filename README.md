@@ -38,6 +38,10 @@ Options:
 
 ### Examples
 
+Find out the public IP of all of your instances:
+
+    hands -e "instance.ip_address"
+
 Find out the uptime of all of your instances (across all US regions) that are in an auto-scaling group with "production" and "Web" in its name:
 
     hands -k ~/.ssh/some-key.pem -a "*production*Web*" uptime
@@ -45,6 +49,8 @@ Find out the uptime of all of your instances (across all US regions) that are in
 Get the public DNS name of all of your instances with names that match "logs":
 
     hands -n "*logs*" -e "instance.dns_name"
+
+For `eval`, you can use any method listed in the [AWS documentation](http://docs.aws.amazon.com/AWSRubySDK/latest/AWS/EC2/Instance.html).
 
 ## Contributing
 
