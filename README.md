@@ -15,17 +15,23 @@ You can set up your Amazon access key and secret as environment variables:
 
 Options:
 
-                   --stack, -s <s>:   Run on instances that are part of a CloudFormation stack (wildcard is okay)
+                   --stack, -s <s>:   Run on instances that are part of a CloudFormation stack
+                                        (wildcard is okay)
       --auto-scaling-group, -a <s>:   Run on instances that are part of the named auto scaling group
-                    --name, -n <s>:   Run on instances with names that match (wildcard is okay) (default: *)
-                  --region, -r <s>:   Limit command to the given comma-separated regions (wildcard is okay) (default: us-*)
-                    --eval, -e <s>:   Evaluate Ruby expression for each instance (local variable called `instance`)
+                    --name, -n <s>:   Run on instances with names that match
+                                        (wildcard is okay) (default: *)
+                  --region, -r <s>:   Limit command to the given comma-separated regions
+                                        (wildcard is okay) (default: us-*)
+                    --eval, -e <s>:   Evaluate Ruby expression for each instance
+                                        (local variable called `instance`)
                 --username, -u <s>:   Username for SSH login (default: ubuntu)
                 --key-file, -k <s>:   Key file for SSH login
           --aws-access-key, -O <s>:   Defaults to the value of the AWS_ACCESS_KEY environment variable
           --aws-secret-key, -W <s>:   Defaults to the value of the AWS_SECRET_KEY environment variable
                      --version, -v:   Print version and exit
                         --help, -h:   Show this message
+
+### Examples
 
 Find out the uptime of all of your instances (across all US regions) that are in an auto-scaling group with "production" and "Web" in its name:
 
