@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+require 'aws-sdk'
+require 'rye'
+require 'trollop'
+
+# Examples:
+#   hands -> usage example
+#   hands --stack=mobile-production* "date"
+#   hands --stack=mobile-production* --eval "instance.ip_address"
+
+opts = Trollop::options do
+  version "hands 1.0 (c) 2013 Phil Calvin"
+  opt :stack, "Run on instances that are part of a CloudFormation stack (wildcard is okay)",
+      :type => :string
+  opt :auto_scaling_group, "Run on instances that are part of the named auto scaling group",
+      :type => :string
+  opt :name, "Run on instances with names that match (wildcard is okay)", :default => "*"
+  opt :region, "Limit command to the given comma-separated regions (wildcard is okay)", :default => "us-*"
+  opt :eval, "Evaluate Ruby expression for each instance (local variable called `instance`)",
+      :type => :string
+
+  opt :username, "Username for SSH login", :default => "ubuntu"
+  opt :key_file, "Key file for SSH login", :type => :string
+  opt :aws_access_key, "Defaults to the value of the AWS_ACCESS_KEY environment variable",
+      :short => "O", :type => :string
+  opt :aws_secret_key, "Defaults to the value of the AWS_SECRET_KEY environment variable",
+      :short => "W", :type => :string
+end
+
+command = ARGV.shift || "uname -a"
+
+access_key = opts[:aws_access_key] || ENV["AWS_ACCESS_KEY"] || ENV["AWSAccessKeyId"]
+access_secret = opts[:aws_secret_key] || ENV["AWS_SECRET_KEY"] || ENV["AWSSecretKey"]
+
+AWS.config(:access_key_id => access_key,
+           :secret_access_key => access_secret)
+
+# File::FNM_CASEFOLD
+regions = AWS.regions.find_all do |region|
+  File.fnmatch(opts[:region], region.name)
+end
+
+instances = regions.collect do |region|
+  all_instances = if opts[:stack]
+    region.cloud_formation.stacks.find_all do |stack|
+      File.fnmatch(opts[:stack], stack.name)
+    end.collect do |stack|
+      stack.resources.find_all do |resource|
+        resource.resource_type == 'AWS::EC2::Instance'
+      end
+    end.flatten.collect do |resource|
+      region.ec2.instances[resource.physical_resource_id]
+    end
+  elsif opts[:auto_scaling_group]
+    region.auto_scaling.groups.find_all do |group|
+      File.fnmatch(opts[:auto_scaling_group], group.name)
+    end.collect do |group|
+      group.auto_scaling_instances.collect(&:ec2_instance)
+    end.flatten
+  else
+    region.ec2.instances
+  end
+  all_instances.find_all do |instance|
+    File.fnmatch(opts[:name], instance.tags['Name'])
+  end
+end.flatten
+
+# puts instances.collect {|instance| instance.tags['Name']}
+
+  # resource_id = cloud.stacks[region[:stack]].resources['WebServerGroup'].physical_resource_id
+  # asg = AWS::AutoScaling.new(:region => region[:region]).groups[resource_id]
+  # asg.auto_scaling_instances.collect(&:ec2_instance)
+
+if opts[:eval]
+  lines = instances.collect do |instance|
+    "#{instance.tags['Name']} => #{eval(opts[:eval])}"
+  end
+  puts lines.join("\n")
+elsif instances.size > 0
+  boxes = instances.collect do |instance|
+    Rye::Box.new(instance.dns_name,
+                 :user => opts[:username],
+                 :keys => [opts[:key_file]],
+                 :safe => false)
+  end
+
+  box_set = Rye::Set.new :parallel => true, :safe => false
+  box_set.add_boxes *boxes
+  puts box_set.execute command
+end
