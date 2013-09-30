@@ -3,6 +3,7 @@
 require 'aws-sdk'
 require 'rye'
 require 'trollop'
+require 'hands'
 
 # Examples:
 #   hands -> usage example
@@ -10,7 +11,7 @@ require 'trollop'
 #   hands --stack=mobile-production* --eval "instance.ip_address"
 
 opts = Trollop::options do
-  version "hands 1.0 (c) 2013 Phil Calvin"
+  version "hands #{Hands::VERSION} (c) 2013 Phil Calvin"
   banner <<-EOS
     hands - run a command on many cloud machines at once
 
