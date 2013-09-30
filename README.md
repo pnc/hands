@@ -1,10 +1,15 @@
-# Hands
+# 👐 Hands 👐
 
 Splay your greasy paws across your cloud infrastructure.
 
 ## Installation
 
-    $ gem install hands
+This thing is too fresh for RubyGems. Cut master:
+
+    $ git clone https://github.com/pnc/hands.git
+    $ cd hands
+    $ bundle
+    $ rake install
 
 ## Usage
 
