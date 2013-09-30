@@ -8,8 +8,13 @@ Splay your greasy paws across your cloud infrastructure.
 
 ## Usage
 
-    hands 1.0 (c) 2013 Phil Calvin
-    Options:
+You can set up your Amazon access key and secret as environment variables:
+
+    export AWS_ACCESS_KEY=yourkeyhere
+    export AWS_SECRET_KEY=somesecret/1aaa
+
+Options:
+
                    --stack, -s <s>:   Run on instances that are part of a CloudFormation stack (wildcard is okay)
       --auto-scaling-group, -a <s>:   Run on instances that are part of the named auto scaling group
                     --name, -n <s>:   Run on instances with names that match (wildcard is okay) (default: *)
